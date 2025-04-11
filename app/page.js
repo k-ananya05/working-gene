@@ -27,10 +27,10 @@ export default function Home() {
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="grid w-full grid-cols-3 mb-8">
             <TabsTrigger value="upload">Gene Upload</TabsTrigger>
-            <TabsTrigger value="recommendations" disabled={!analysisResults}>
+            <TabsTrigger value="recommendations" >
               Diet Recommendations
             </TabsTrigger>
-            <TabsTrigger value="tracking" disabled={!analysisResults}>
+            <TabsTrigger value="tracking" >
               Fitness Tracking
             </TabsTrigger>
           </TabsList>
