@@ -91,9 +91,9 @@ export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
               onClick={() => document.getElementById("file-upload").click()}
             >
               <input
-                id="file-upload"
+                id="file-upload"s
                 type="file"
-                accept=".txt"
+                accept="."
                 className="hidden"
                 onChange={handleFileChange}
               />
