@@ -23,6 +23,11 @@ export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
   const [fileName, setFileName] = useState("")
   const [isAnalyzing, setIsAnalyzing] = useState(false)
   const [error, setError] = useState("")
+  const [diseaseProbabilities, setDiseaseProbabilities] = useState({
+    DiseaseA: 0,
+    DiseaseB: 0,
+    DiseaseC: 0,
+  })
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0]
@@ -51,9 +56,17 @@ export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
     try {
       // Simulate processing (replace with actual PDF processing later)
       setTimeout(() => {
-        const results = analyzeGeneData(file) // Pass raw file for backend or PDF parsing
+        const results = analyzeGeneData(file)
         setGeneData(file)
         onAnalysisComplete(results)
+
+        // Example dummy probability results
+        setDiseaseProbabilities({
+          DiseaseA: 62,
+          DiseaseB: 34,
+          DiseaseC: 78,
+        })
+
         setIsAnalyzing(false)
       }, 2000)
     } catch (err) {
@@ -160,6 +173,58 @@ export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
           </CardContent>
         </Card>
       )}
+
+      {/* Disease Probability Display */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Disease Risk Probabilities</CardTitle>
+          <CardDescription>
+            Default values are 0% and will update after analysis.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+            {Object.entries(diseaseProbabilities).map(([disease, value]) => (
+              <div key={disease}>
+                <svg className="w-24 h-24 mx-auto">
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="42"
+                    stroke="#e5e7eb"
+                    strokeWidth="10"
+                    fill="none"
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="42"
+                    stroke="#10b981"
+                    strokeWidth="10"
+                    fill="none"
+                    strokeDasharray={264}
+                    strokeDashoffset={264 - (264 * value) / 100}
+                    strokeLinecap="round"
+                    transform="rotate(-90 48 48)"
+                    style={{ transition: "stroke-dashoffset 0.5s ease" }}
+                  />
+                  <text
+                    x="48"
+                    y="52"
+                    textAnchor="middle"
+                    fontSize="16"
+                    fill="#111827"
+                    fontWeight="bold"
+                  >
+                    {value}%
+                  </text>
+                </svg>
+                <p className="mt-2 font-medium">{disease}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   )
 }
