@@ -32,12 +32,12 @@ export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0]
     if (selectedFile) {
-      if (selectedFile.name.endsWith(".pdf")) {
+      if (selectedFile.name.endsWith(".txt")) {
         setFile(selectedFile)
         setFileName(selectedFile.name)
         setError("")
       } else {
-        setError("Please upload a .pdf file from 23andMe or AncestryDNA")
+        setError("Please upload a .txt file from 23andMe")
         setFile(null)
         setFileName("")
       }
@@ -81,7 +81,7 @@ export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
         <CardHeader>
           <CardTitle>Upload Your Genetic Data</CardTitle>
           <CardDescription>
-            Upload your 23andMe or AncestryDNA raw data file (.pdf format)
+            Upload your 23andMe or AncestryDNA raw data file (.txt format)
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -93,7 +93,7 @@ export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
               <input
                 id="file-upload"
                 type="file"
-                accept=".pdf"
+                accept=".txt"
                 className="hidden"
                 onChange={handleFileChange}
               />
@@ -102,7 +102,7 @@ export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
                 {fileName || "Click to upload or drag and drop"}
               </h3>
               <p className="text-sm text-gray-500">
-                Supports .pdf files from 23andMe or AncestryDNA
+                Supports .txt files from 23andMe
               </p>
             </div>
 
