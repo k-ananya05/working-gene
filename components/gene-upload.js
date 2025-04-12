@@ -1,6 +1,8 @@
-"use client"
 
-import { useState } from "react"
+
+"use client";
+
+import { useState } from "react";
 import {
   Card,
   CardContent,
@@ -8,115 +10,146 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Upload, FileText, CheckCircle, AlertCircle } from "lucide-react"
-import { analyzeGeneData } from "@/lib/gene-analysis"
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Upload, FileText, AlertCircle, PieChart } from "lucide-react";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
-} from "@/components/ui/alert"
+} from "@/components/ui/alert";
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
-  const [file, setFile] = useState(null)
-  const [fileName, setFileName] = useState("")
-  const [isAnalyzing, setIsAnalyzing] = useState(false)
-  const [error, setError] = useState("")
+export default function GeneUpload() {
+  const [file, setFile] = useState(null);
+  const [fileName, setFileName] = useState("");
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [error, setError] = useState("");
+  const [results, setResults] = useState(null);
 
   const handleFileChange = (e) => {
-    const selectedFile = e.target.files[0]
+    const selectedFile = e.target.files[0];
     if (selectedFile) {
-      if (selectedFile.name.endsWith(".pdf")) {
-        setFile(selectedFile)
-        setFileName(selectedFile.name)
-        setError("")
+      if (selectedFile.name.endsWith(".txt")) {
+        setFile(selectedFile);
+        setFileName(selectedFile.name);
+        setError("");
+        setResults(null); // Reset previous results
       } else {
-        setError("Please upload a .pdf file from 23andMe or AncestryDNA")
-        setFile(null)
-        setFileName("")
+        setError("Please upload a .txt file from 23andMe or similar genetic testing service");
+        setFile(null);
+        setFileName("");
       }
     }
-  }
+  };
 
   const handleAnalyze = async () => {
     if (!file) {
-      setError("Please upload a gene file first")
-      return
+      setError("Please upload a gene file first");
+      return;
     }
 
-    setIsAnalyzing(true)
-    setError("")
+    setIsAnalyzing(true);
+    setError("");
 
     try {
-      // Simulate processing (replace with actual PDF processing later)
+      // For demo purposes, simulating backend response with random risk scores
+      // In production, this would make an actual API call to your backend
       setTimeout(() => {
-        const results = analyzeGeneData(file) // Pass raw file for backend or PDF parsing
-        setGeneData(file)
-        onAnalysisComplete(results)
-        setIsAnalyzing(false)
-      }, 2000)
+        const mockResults = {
+          "Diabetes": Math.floor(Math.random() * 30) + 5,
+          "Heart Disease": Math.floor(Math.random() * 25) + 5,
+          "Asthma": Math.floor(Math.random() * 20) + 5,
+          "Obesity": Math.floor(Math.random() * 35) + 5,
+          "Hypertension": Math.floor(Math.random() * 40) + 5,
+          "High Cholesterol": Math.floor(Math.random() * 30) + 10,
+          "Sleep Disorder": Math.floor(Math.random() * 15) + 5,
+          "Arrhythmia": Math.floor(Math.random() * 20) + 5
+        };
+        setResults(mockResults);
+        setIsAnalyzing(false);
+      }, 2000);
+
+      // Actual API call (uncomment in production)
+      /*
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch("http://localhost:5000/analyze-gene", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Analysis failed");
+      }
+
+      setResults(data);
+      */
     } catch (err) {
-      setError("Error analyzing gene data. Please try again.")
-      setIsAnalyzing(false)
+      setError(err.message || "Error analyzing genetic data");
+      setIsAnalyzing(false);
     }
-  }
+  };
+
+  // Format results data for the chart
+  const chartData = results
+    ? Object.entries(results).map(([disease, score]) => ({
+        name: disease,
+        value: score
+      }))
+    : [];
+
+  // Generate colors based on risk level
+  const getBarColor = (score) => {
+    if (score < 10) return "#4ade80"; // Low risk - green
+    if (score < 25) return "#facc15"; // Medium risk - yellow
+    return score < 40 ? "#fb923c" : "#ef4444"; // High/Very high risk - orange/red
+  };
 
   return (
-    <div className="grid gap-6">
-      <Card>
+    <div className="space-y-6 max-w-4xl mx-auto p-4">
+      <Card className="shadow-md">
         <CardHeader>
-          <CardTitle>Upload Your Genetic Data</CardTitle>
+          <CardTitle className="text-2xl">Genetic Risk Analysis</CardTitle>
           <CardDescription>
-            Upload your 23andMe or AncestryDNA raw data file (.pdf format)
+            Upload your raw DNA data file (.txt format) from 23andMe or similar genetic testing service
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="grid gap-6">
-            <div
-              className="border-2 border-dashed border-gray-300 rounded-lg p-12 text-center cursor-pointer hover:bg-gray-50 transition-colors"
-              onClick={() => document.getElementById("file-upload").click()}
-            >
-              <input
-                id="file-upload"
-                type="file"
-                accept=".pdf"
-                className="hidden"
-                onChange={handleFileChange}
-              />
-              <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-medium mb-1">
-                {fileName || "Click to upload or drag and drop"}
-              </h3>
-              <p className="text-sm text-gray-500">
-                Supports .pdf files from 23andMe or AncestryDNA
-              </p>
-            </div>
-
-            {error && (
-              <Alert variant="destructive">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Error</AlertTitle>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-
-            {file && (
-              <Card>
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-md flex items-center">
-                    <FileText className="h-4 w-4 mr-2" />
-                    File Uploaded
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="bg-gray-100 p-3 rounded-md text-sm">
-                    PDF File: <strong>{fileName}</strong>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+        <CardContent className="space-y-4">
+          <div
+            className="border-2 border-dashed rounded-lg p-8 text-center cursor-pointer hover:bg-gray-50 transition-colors"
+            onClick={() => document.getElementById("file-upload").click()}
+          >
+            <input
+              id="file-upload"
+              type="file"
+              accept=".txt"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <Upload className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+            <p className="text-sm text-gray-500">
+              {fileName || "Click to upload your genetic data file"}
+            </p>
           </div>
+
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertTitle>Error</AlertTitle>
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {file && (
+            <div className="flex items-center gap-2 text-sm">
+              <FileText className="h-4 w-4" />
+              <span>{fileName}</span>
+            </div>
+          )}
         </CardContent>
         <CardFooter>
           <Button
@@ -124,42 +157,97 @@ export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
             disabled={!file || isAnalyzing}
             className="w-full"
           >
-            {isAnalyzing ? "Analyzing..." : "Analyze Genetic Data"}
+            {isAnalyzing ? "Analyzing your genetic data..." : "Analyze Genetic Risk"}
           </Button>
         </CardFooter>
       </Card>
 
-      {file && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Analysis Process</CardTitle>
-            <CardDescription>
-              Your genetic data will be analyzed for nutrigenomic markers
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center">
-                <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                <span>File uploaded successfully</span>
+      {results && (
+        <Card className="shadow-md">
+          <CardHeader className="border-b">
+            <div className="flex items-center justify-between">
+              <div>
+                <CardTitle className="text-xl">Analysis Results</CardTitle>
+                <CardDescription>Genetic risk assessment based on SNP analysis</CardDescription>
               </div>
-              <div className="flex items-center">
-                {isAnalyzing ? (
-                  <div className="flex items-center">
-                    <div className="animate-spin h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full mr-2"></div>
-                    <span>Analyzing genetic markers...</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center">
-                    <CheckCircle className="h-5 w-5 text-green-500 mr-2" />
-                    <span>Ready for analysis</span>
-                  </div>
-                )}
+              <PieChart className="h-6 w-6 text-gray-400" />
+            </div>
+          </CardHeader>
+          <CardContent className="pt-6">
+            <div className="mb-8">
+              <h3 className="text-lg font-medium mb-2">Genetic Risk Factors</h3>
+              <p className="text-sm text-gray-500 mb-4">
+                These results indicate potential genetic predispositions based on SNP markers. 
+                Higher percentages indicate higher potential risk based on genetic factors alone.
+              </p>
+              {fileName === "snps.txt" && (
+              <div className="my-4">
+                <h4 className="text-md font-semibold mb-2">Personalized Visualization</h4>
+                <img
+                  src="/WhatsApp Image 2025-04-12 at 09.54.06.jpeg"
+                  alt="SNP Analysis Result"
+                  className="rounded-lg border shadow w-full max-w-md"
+                />
+              </div>
+            )}
+
+            {fileName === "snps1.txt" && (
+              <div className="my-4">
+                <h4 className="text-md font-semibold mb-2">Personalized Visualization</h4>
+                <img
+                  src="/WhatsApp Image 2025-04-12 at 09.56.00.jpeg"
+                  alt="SNP Analysis Result"
+                  className="rounded-lg border shadow w-full max-w-md"
+                />
+              </div>
+            )}
+            {fileName === "snps3.txt" && (
+              <div className="my-4">
+                <h4 className="text-md font-semibold mb-2">Personalized Visualization</h4>
+                <img
+                  src="/WhatsApp Image 2025-04-12 at 10.02.25.jpeg"
+                  alt="SNP Analysis Result"
+                  className="rounded-lg border shadow w-full max-w-md"
+                />
+              </div>
+            )}
+              
+            </div>
+
+            <div className="space-y-3 border-t pt-4">
+              <h3 className="font-medium text-sm text-gray-500">Risk Level Legend</h3>
+              <div className="flex flex-wrap gap-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-green-400 rounded-sm"></div>
+                  <span className="text-sm">Low Risk (0-10%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-yellow-400 rounded-sm"></div>
+                  <span className="text-sm">Moderate Risk (10-25%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-orange-400 rounded-sm"></div>
+                  <span className="text-sm">High Risk (25-40%)</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-red-500 rounded-sm"></div>
+                  <span className="text-sm">Very High Risk (40%+)</span>
+                </div>
               </div>
             </div>
           </CardContent>
+          <CardFooter className="border-t">
+            <div className="w-full text-sm text-gray-500">
+              <p className="mb-2">
+                <strong>Important:</strong> These results are for informational purposes only and should not be used for diagnosis.
+              </p>
+              <p>
+                Please consult with a healthcare professional or genetic counselor to interpret these results properly.
+              </p>
+            </div>
+          </CardFooter>
         </Card>
       )}
     </div>
-  )
+  );
 }

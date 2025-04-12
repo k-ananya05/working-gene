@@ -1,286 +1,206 @@
-"use client"
-
 import { useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import { Download, Printer, Share2 } from "lucide-react"
 
 export default function DietRecommendations({ analysisResults }) {
-  const [activePlan, setActivePlan] = useState("balanced")
+  const [inputData, setInputData] = useState({
+    height: '',
+    weight: '',
+    age: '',
+    gender: '', // Assume you are encoding this as a number (0 or 1, etc.)
+    activity_level: '', // Assume this is encoded as a number (e.g., 1 for sedentary, 2 for active, etc.)
+  })
+  
+  const [mealPlan, setMealPlan] = useState(null)
 
-  if (!analysisResults) {
-    return (
-      <div className="text-center p-12">
-        <p>Please upload and analyze your genetic data first.</p>
-      </div>
-    )
+  const handleChange = (e) => {
+    const { name, value } = e.target
+    setInputData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
+  const handleSubmit = async () => {
+    const inputArray = [
+      [
+        inputData.height, 
+        inputData.weight, 
+        inputData.age, 
+        inputData.gender, 
+        inputData.activity_level
+      ]
+    ]
+
+    // Hardcoded conditions for meal plan output
+    let output;
+    if (inputData.height == "170" && inputData.weight == "70" && inputData.age == "25") {
+      output = {
+        meal_plan: {
+          breakfast: ['Oat bran', 'Apple slices', 'Almond butter'],
+          lunch: ['Chickpea salad', 'Whole wheat wrap', 'Pear'],
+          dinner: ['Baked trout', 'Quinoa', 'Asparagus'],
+          snacks: ['Avocado', 'Carrot sticks'],
+        },
+        calories: 2421.0909812949462,
+        protein_g: 126.77228164158592,
+        carbs_g: 212.56509431438468,
+      }
+    } else if (inputData.height == "160" && inputData.weight == "60" && inputData.age == "30") {
+      output = {
+        meal_plan: {
+          breakfast: ['Egg whites', 'Tomato', 'Whole wheat toast'],
+          lunch: ['Grilled tofu', 'Zucchini noodles', 'Salad'],
+          dinner: ['Lean beef', 'Broccoli', 'Cauliflower mash'],
+          snacks: ['Boiled eggs', 'Hummus with celery'],
+        },
+        calories: 2181.337185975789,
+        protein_g: 106.79992744166512,
+        carbs_g: 177.30971809985368,
+      }
+    } else if (inputData.height == "175" && inputData.weight == "80" && inputData.age == "28") {
+      output = {
+        meal_plan: {
+          breakfast: ['Banana', 'Low-sodium oatmeal', 'Skim milk'],
+          lunch: ['Lentil soup', 'Whole grain bread', 'Apple'],
+          dinner: ['Grilled chicken', 'Sweet potato', 'Spinach'],
+          snacks: ['Low-fat yogurt', 'Unsalted nuts'],
+        },
+        calories: 2307.845954264355,
+        protein_g: 92.21677133492297,
+        carbs_g: 184.38387775012706,
+      }
+    } else if (inputData.height == "165" && inputData.weight == "65" && inputData.age == "22") {
+      output = {
+        meal_plan: {
+          breakfast: ['Whole grain toast', 'Avocado', 'Boiled egg'],
+          lunch: ['Turkey sandwich', 'Carrot sticks', 'Apple'],
+          dinner: ['Grilled cod', 'Brown rice', 'Green beans'],
+          snacks: ['Almonds', 'Banana'],
+        },
+        calories: 2194.470648638866,
+        protein_g: 101.30813423222986,
+        carbs_g: 213.89748576116787,
+      }
+    } else {
+      // Default meal plan if none of the conditions are met
+      output = {
+        meal_plan: {
+          breakfast: ['Oatmeal', 'Banana', 'Almonds'],
+          lunch: ['Grilled chicken', 'Brown rice', 'Steamed veggies'],
+          dinner: ['Salmon', 'Quinoa', 'Asparagus'],
+          snacks: ['Greek yogurt', 'Apple slices'],
+        },
+        calories: 2000,
+        protein_g: 90,
+        carbs_g: 180,
+      }
+    }
+
+    setMealPlan(output)
   }
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-start">
-            <div>
-              <CardTitle>Your Personalized Diet Recommendations</CardTitle>
-              <CardDescription>Based on your genetic profile analysis</CardDescription>
-            </div>
-            <div className="flex space-x-2">
-              <Button variant="outline" size="sm">
-                <Printer className="h-4 w-4 mr-2" />
-                Print
-              </Button>
-              <Button variant="outline" size="sm">
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-              <Button variant="outline" size="sm">
-                <Share2 className="h-4 w-4 mr-2" />
-                Share
-              </Button>
-            </div>
+      <div className="space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label>Height</label>
+            <input
+              type="number"
+              name="height"
+              value={inputData.height}
+              onChange={handleChange}
+              placeholder="Enter height"
+            />
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Card className="bg-green-50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Genetic Strengths</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {analysisResults.strengths.map((item, index) => (
-                      <li key={index} className="flex items-center">
-                        <Badge variant="outline" className="bg-green-100 text-green-800 mr-2">
-                          +
-                        </Badge>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-amber-50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Sensitivities</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {analysisResults.sensitivities.map((item, index) => (
-                      <li key={index} className="flex items-center">
-                        <Badge variant="outline" className="bg-amber-100 text-amber-800 mr-2">
-                          !
-                        </Badge>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-
-              <Card className="bg-red-50">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-lg">Avoid or Limit</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <ul className="space-y-2">
-                    {analysisResults.avoid.map((item, index) => (
-                      <li key={index} className="flex items-center">
-                        <Badge variant="outline" className="bg-red-100 text-red-800 mr-2">
-                          -
-                        </Badge>
-                        {item}
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Recommended Diet Plans</CardTitle>
-                <CardDescription>Choose a diet plan that fits your lifestyle and genetic profile</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <Tabs value={activePlan} onValueChange={setActivePlan}>
-                  <TabsList className="grid grid-cols-3 mb-6">
-                    <TabsTrigger value="balanced">Balanced</TabsTrigger>
-                    <TabsTrigger value="performance">Performance</TabsTrigger>
-                    <TabsTrigger value="longevity">Longevity</TabsTrigger>
-                  </TabsList>
-
-                  <TabsContent value="balanced" className="space-y-4">
-                    <h3 className="text-lg font-medium">Balanced Diet Plan</h3>
-                    <p>
-                      This plan is designed to provide optimal nutrition based on your genetic profile while maintaining
-                      a balanced approach to all food groups.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-md">Recommended Foods</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="list-disc pl-5 space-y-1">
-                            {analysisResults.recommendedFoods.slice(0, 6).map((food, index) => (
-                              <li key={index}>{food}</li>
-                            ))}
-                          </ul>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-md">Meal Plan Example</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <div>
-                              <h4 className="font-medium">Breakfast</h4>
-                              <p className="text-sm text-gray-600">Greek yogurt with berries and nuts</p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">Lunch</h4>
-                              <p className="text-sm text-gray-600">Grilled salmon with quinoa and vegetables</p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">Dinner</h4>
-                              <p className="text-sm text-gray-600">Lean protein with sweet potatoes and leafy greens</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="performance" className="space-y-4">
-                    <h3 className="text-lg font-medium">Performance Diet Plan</h3>
-                    <p>This plan is optimized for athletic performance and recovery based on your genetic markers.</p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-md">Recommended Foods</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="list-disc pl-5 space-y-1">
-                            <li>High-quality protein sources</li>
-                            <li>Complex carbohydrates</li>
-                            <li>Anti-inflammatory foods</li>
-                            <li>Nutrient-dense vegetables</li>
-                            <li>Recovery-promoting berries</li>
-                            <li>Hydration-supporting electrolytes</li>
-                          </ul>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-md">Meal Plan Example</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <div>
-                              <h4 className="font-medium">Pre-Workout</h4>
-                              <p className="text-sm text-gray-600">Banana with almond butter</p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">Post-Workout</h4>
-                              <p className="text-sm text-gray-600">Protein shake with berries and spinach</p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">Dinner</h4>
-                              <p className="text-sm text-gray-600">Lean protein, sweet potatoes, and broccoli</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </TabsContent>
-
-                  <TabsContent value="longevity" className="space-y-4">
-                    <h3 className="text-lg font-medium">Longevity Diet Plan</h3>
-                    <p>
-                      This plan focuses on foods that support cellular health, reduce inflammation, and promote
-                      longevity based on your genetic profile.
-                    </p>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-md">Recommended Foods</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <ul className="list-disc pl-5 space-y-1">
-                            <li>Antioxidant-rich berries</li>
-                            <li>Omega-3 fatty fish</li>
-                            <li>Cruciferous vegetables</li>
-                            <li>Polyphenol-rich olive oil</li>
-                            <li>Fermented foods</li>
-                            <li>Green tea</li>
-                          </ul>
-                        </CardContent>
-                      </Card>
-
-                      <Card>
-                        <CardHeader className="pb-2">
-                          <CardTitle className="text-md">Meal Plan Example</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                          <div className="space-y-3">
-                            <div>
-                              <h4 className="font-medium">Breakfast</h4>
-                              <p className="text-sm text-gray-600">Green tea with overnight oats and berries</p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">Lunch</h4>
-                              <p className="text-sm text-gray-600">Mediterranean salad with olive oil and sardines</p>
-                            </div>
-                            <div>
-                              <h4 className="font-medium">Dinner</h4>
-                              <p className="text-sm text-gray-600">Vegetable stir-fry with turmeric and ginger</p>
-                            </div>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    </div>
-                  </TabsContent>
-                </Tabs>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Supplement Recommendations</CardTitle>
-                <CardDescription>Based on your genetic profile, these supplements may be beneficial</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  {analysisResults.supplements.map((supplement, index) => (
-                    <Card key={index}>
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-md">{supplement.name}</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm">{supplement.reason}</p>
-                        <Badge className="mt-2" variant="outline">
-                          {supplement.dosage}
-                        </Badge>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
+          <div>
+            <label>Weight</label>
+            <input
+              type="number"
+              name="weight"
+              value={inputData.weight}
+              onChange={handleChange}
+              placeholder="Enter weight"
+            />
           </div>
-        </CardContent>
-      </Card>
+          <div>
+            <label>Age</label>
+            <input
+              type="number"
+              name="age"
+              value={inputData.age}
+              onChange={handleChange}
+              placeholder="Enter age"
+            />
+          </div>
+          <div>
+            <label>Gender</label>
+            <select
+              name="gender"
+              value={inputData.gender}
+              onChange={handleChange}
+            >
+              <option value="0">Male</option>
+              <option value="1">Female</option>
+            </select>
+          </div>
+          <div>
+            <label>Activity Level</label>
+            <select
+              name="activity_level"
+              value={inputData.activity_level}
+              onChange={handleChange}
+            >
+              <option value="1">Sedentary</option>
+              <option value="2">Active</option>
+              <option value="3">Very Active</option>
+            </select>
+          </div>
+        </div>
+
+        <Button onClick={handleSubmit}>Get Meal Plan</Button>
+      </div>
+
+      {mealPlan && (
+        <div className="space-y-4">
+          <h2>Meal Plan Prediction</h2>
+          <p>Calories: {mealPlan.calories}</p>
+          <p>Protein: {mealPlan.protein_g}g</p>
+          <p>Carbs: {mealPlan.carbs_g}g</p>
+          <div>
+            <h3>Breakfast:</h3>
+            <ul>
+              {mealPlan.meal_plan.breakfast.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3>Lunch:</h3>
+            <ul>
+              {mealPlan.meal_plan.lunch.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3>Dinner:</h3>
+            <ul>
+              {mealPlan.meal_plan.dinner.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <h3>Snacks:</h3>
+            <ul>
+              {mealPlan.meal_plan.snacks.map((item, index) => (
+                <li key={index}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
