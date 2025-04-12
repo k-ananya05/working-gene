@@ -20,25 +20,23 @@ import {
 } from "@/components/ui/alert";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
-export default function GeneUpload() {
-  const [file, setFile] = useState(null);
-  const [fileName, setFileName] = useState("");
-  const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [error, setError] = useState("");
-  const [results, setResults] = useState(null);
+export default function GeneUpload({ onAnalysisComplete, setGeneData }) {
+  const [file, setFile] = useState(null)
+  const [fileName, setFileName] = useState("")
+  const [isAnalyzing, setIsAnalyzing] = useState(false)
+  const [error, setError] = useState("")
 
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (selectedFile) {
-      if (selectedFile.name.endsWith(".txt")) {
-        setFile(selectedFile);
-        setFileName(selectedFile.name);
-        setError("");
-        setResults(null); // Reset previous results
+      if (selectedFile.name.endsWith(".pdf")) {
+        setFile(selectedFile)
+        setFileName(selectedFile.name)
+        setError("")
       } else {
-        setError("Please upload a .txt file from 23andMe or similar genetic testing service");
-        setFile(null);
-        setFileName("");
+        setError("Please upload a .pdf file from 23andMe or AncestryDNA")
+        setFile(null)
+        setFileName("")
       }
     }
   };
@@ -92,7 +90,7 @@ export default function GeneUpload() {
       setError(err.message || "Error analyzing genetic data");
       setIsAnalyzing(false);
     }
-  };
+  }
 
   // Format results data for the chart
   const chartData = results
@@ -108,7 +106,6 @@ export default function GeneUpload() {
     if (score < 25) return "#facc15"; // Medium risk - yellow
     return score < 40 ? "#fb923c" : "#ef4444"; // High/Very high risk - orange/red
   };
-
   return (
     <div className="space-y-6 max-w-4xl mx-auto p-4">
       <Card className="shadow-md">
@@ -248,6 +245,58 @@ export default function GeneUpload() {
           </CardFooter>
         </Card>
       )}
+
+      {/* Disease Probability Display */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Disease Risk Probabilities</CardTitle>
+          <CardDescription>
+            Default values are 0% and will update after analysis.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center">
+            {Object.entries(diseaseProbabilities).map(([disease, value]) => (
+              <div key={disease}>
+                <svg className="w-24 h-24 mx-auto">
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="42"
+                    stroke="#e5e7eb"
+                    strokeWidth="10"
+                    fill="none"
+                  />
+                  <circle
+                    cx="48"
+                    cy="48"
+                    r="42"
+                    stroke="#10b981"
+                    strokeWidth="10"
+                    fill="none"
+                    strokeDasharray={264}
+                    strokeDashoffset={264 - (264 * value) / 100}
+                    strokeLinecap="round"
+                    transform="rotate(-90 48 48)"
+                    style={{ transition: "stroke-dashoffset 0.5s ease" }}
+                  />
+                  <text
+                    x="48"
+                    y="52"
+                    textAnchor="middle"
+                    fontSize="16"
+                    fill="#111827"
+                    fontWeight="bold"
+                  >
+                    {value}%
+                  </text>
+                </svg>
+                <p className="mt-2 font-medium">{disease}</p>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
